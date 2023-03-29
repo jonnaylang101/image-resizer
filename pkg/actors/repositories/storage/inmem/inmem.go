@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"path/filepath"
 
 	"github.com/jonnaylang101/image-resizer/pkg/core/ports"
 )
@@ -38,13 +39,16 @@ func (s *storage) Add(storagePath string, image io.Reader) error {
 		return errors.New(ErrInvalidImageFile)
 	}
 
-	filepath := s.memPath + "/" + url.PathEscape(storagePath)
+	fp := filepath.Clean(filepath.Join(s.memPath, url.PathEscape(storagePath)))
 
-	if _, err := os.Stat(filepath); !errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(fp); !errors.Is(err, os.ErrNotExist) {
 		return errors.New(ErrImageFileDuplication)
 	}
 
-	f, err := os.Create(filepath)
+	f, err := os.Create(fp)
+	if f != nil {
+		defer func() { _ = f.Close() }()
+	}
 	if err != nil {
 		return err
 	}
@@ -61,10 +65,11 @@ func (s *storage) GetByStoragePath(storagePath string) (*os.File, error) {
 		return nil, errors.New(ErrInvalidStoragePath)
 	}
 
-	filepath := s.memPath + "/" + url.PathEscape(storagePath)
-	if _, err := os.Stat(filepath); errors.Is(err, os.ErrNotExist) {
+	fp := filepath.Clean(filepath.Join(s.memPath, url.PathEscape(storagePath)))
+
+	if _, err := os.Stat(fp); errors.Is(err, os.ErrNotExist) {
 		return nil, errors.New(ErrFileNotFound)
 	}
 
-	return os.Open(filepath)
+	return os.Open(fp)
 }
