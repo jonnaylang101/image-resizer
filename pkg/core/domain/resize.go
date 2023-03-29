@@ -1,10 +1,7 @@
 package domain
 
-type ResizeRequestConfig struct {
-	SourceImageStoragePath string
-	Width                  int32
-	Height                 int32
-}
+// TODO: this is a slightly smaller problem space that might not require a domain struct of any kind.
+// ResizeResponse may find a better home in the ports
 
 type ResizeResponse struct {
 	ResizedImagesStoragePaths []string

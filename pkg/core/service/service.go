@@ -28,9 +28,9 @@ func New() ports.Service {
 // to the width and height provided and resave them to the storage account with the filenameSuffix.
 // If any files can't be found using the storagePaths these will be reported after the method has completed working
 // on any files it could locate. If no filenameSuffix is passed, the suffix will default to --resized-<width>-<height>
-func (s *service) Resize(width, height int32, filenameSuffix string, sourceStoragePaths ...string) (domain.ResizeResponse, error) {
+func (s *service) Resize(width, height int32, filenameSuffix string, sourceFileStoragePaths ...string) (domain.ResizeResponse, error) {
 	res := domain.ResizeResponse{}
-	if len(sourceStoragePaths) < 1 {
+	if len(sourceFileStoragePaths) < 1 {
 		return res, errors.New(ErrNoProvidedStoragePaths)
 	}
 	if width < minDimension {
@@ -44,8 +44,8 @@ func (s *service) Resize(width, height int32, filenameSuffix string, sourceStora
 	}
 
 	// TODO: check that all the image files are available before reaching this point.
-	res.ResizedImagesStoragePaths = make([]string, len(sourceStoragePaths))
-	for i, sp := range sourceStoragePaths {
+	res.ResizedImagesStoragePaths = make([]string, len(sourceFileStoragePaths))
+	for i, sp := range sourceFileStoragePaths {
 		res.ResizedImagesStoragePaths[i] = addSuffix(sp, filenameSuffix)
 	}
 
