@@ -10,13 +10,6 @@ import (
 	"github.com/jonnaylang101/image-resizer/pkg/core/ports"
 )
 
-const (
-	ErrInvalidStoragePath   = "storage error: invalid storagePath"
-	ErrInvalidImageFile     = "storage error: invalid image file"
-	ErrImageFileDuplication = "storage error: file already exists"
-	ErrFileNotFound         = "storage error: file not found"
-)
-
 type storage struct {
 	memPath string
 }
@@ -33,16 +26,16 @@ func NewStore(memPath string) (ports.Storage, error) {
 
 func (s *storage) Add(storagePath string, image io.Reader) error {
 	if storagePath == "" {
-		return errors.New(ErrInvalidStoragePath)
+		return errors.New(ports.ErrInvalidStoragePath)
 	}
 	if image == nil {
-		return errors.New(ErrInvalidImageFile)
+		return errors.New(ports.ErrInvalidImageFile)
 	}
 
 	fp := filepath.Clean(filepath.Join(s.memPath, url.PathEscape(storagePath)))
 
 	if _, err := os.Stat(fp); !errors.Is(err, os.ErrNotExist) {
-		return errors.New(ErrImageFileDuplication)
+		return errors.New(ports.ErrImageFileDuplication)
 	}
 
 	f, err := os.Create(fp)
@@ -62,13 +55,13 @@ func (s *storage) Add(storagePath string, image io.Reader) error {
 
 func (s *storage) GetByStoragePath(storagePath string) (*os.File, error) {
 	if storagePath == "" {
-		return nil, errors.New(ErrInvalidStoragePath)
+		return nil, errors.New(ports.ErrInvalidStoragePath)
 	}
 
 	fp := filepath.Clean(filepath.Join(s.memPath, url.PathEscape(storagePath)))
 
 	if _, err := os.Stat(fp); errors.Is(err, os.ErrNotExist) {
-		return nil, errors.New(ErrFileNotFound)
+		return nil, errors.New(ports.ErrFileNotFound)
 	}
 
 	return os.Open(fp)

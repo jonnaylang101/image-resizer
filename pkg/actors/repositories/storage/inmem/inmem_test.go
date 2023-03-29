@@ -43,13 +43,13 @@ func Test_storage_Add(t *testing.T) {
 	t.Run("when the storage path is missing we should receive an error", func(t *testing.T) {
 		err := st.Add("", bytes.NewBuffer(cn))
 		expectError(true, err, t)
-		expectErrorMsg(ErrInvalidStoragePath, err, t)
+		expectErrorMsg(ports.ErrInvalidStoragePath, err, t)
 	})
 
 	t.Run("when the image file has nil value, we should receive an error", func(t *testing.T) {
 		err := st.Add(sk, nil)
 		expectError(true, err, t)
-		expectErrorMsg(ErrInvalidImageFile, err, t)
+		expectErrorMsg(ports.ErrInvalidImageFile, err, t)
 	})
 
 	t.Run("when the file has been added to the store, we should be able to retrieve it", func(t *testing.T) {
@@ -84,14 +84,14 @@ func Test_storage_GetByStoragePath(t *testing.T) {
 	t.Run("when the storage path is missing we should receive an error", func(t *testing.T) {
 		_, err := st.GetByStoragePath("")
 		expectError(true, err, t)
-		expectErrorMsg(ErrInvalidStoragePath, err, t)
+		expectErrorMsg(ports.ErrInvalidStoragePath, err, t)
 	})
 
 	t.Run("when the file can't be found, we should receive an error", func(t *testing.T) {
 		st.memPath = t.TempDir()
 		_, err := st.GetByStoragePath("missingfile.jpg")
 		expectError(true, err, t)
-		expectErrorMsg(ErrFileNotFound, err, t)
+		expectErrorMsg(ports.ErrFileNotFound, err, t)
 	})
 
 	t.Run("when the file is found, we should expect it back with no error", func(t *testing.T) {
