@@ -49,9 +49,9 @@ func (s *service) Resize(width, height int32, filenameSuffix string, sourceFileS
 
 	// TODO: build this without concurrency first then examine the use of concurrent pipelines - benchmark first
 
-	res.ResizedImagesStoragePaths = make([]string, len(sourceFileStoragePaths))
+	res.ProcessedFileStoragePaths = make([]string, len(sourceFileStoragePaths))
 	for i, sp := range sourceFileStoragePaths {
-		res.ResizedImagesStoragePaths[i] = addSuffix(sp, filenameSuffix)
+		res.ProcessedFileStoragePaths[i] = addSuffix(sp, filenameSuffix)
 	}
 
 	return res, nil

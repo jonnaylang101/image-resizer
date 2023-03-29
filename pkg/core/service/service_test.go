@@ -32,7 +32,7 @@ func Test_service_Resize_ValidateInputs(t *testing.T) {
 
 	t.Run("when the filenameSuffix is empty, we should default it to --resized-<width>-<height>", func(t *testing.T) {
 		wantRes := domain.ResizeResponse{
-			ResizedImagesStoragePaths: []string{"some/storage/path--resized-200-300.jpg", "another/files/path--resized-200-300.jpg"},
+			ProcessedFileStoragePaths: []string{"some/storage/path--resized-200-300.jpg", "another/files/path--resized-200-300.jpg"},
 		}
 		res, err := sv.Resize(200, 300, "", "some/storage/path.jpg", "another/files/path.jpg")
 		expectError(false, err, t)
