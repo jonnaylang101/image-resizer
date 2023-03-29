@@ -2,9 +2,20 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/jonnaylang101/image-resizer/pkg/core/domain"
 	"github.com/jonnaylang101/image-resizer/pkg/core/ports"
+)
+
+const (
+	ErrInvalidWidth                 = "Resize error: invalid width provided via ResizeRequestConfig"
+	ErrInvalidHeight                = "Resize error: invalid height provided via ResizeRequestConfig"
+	ErrNoProvidedStoragePaths       = "Resize error: no image storage paths provided"
+	minDimension              int32 = 1
+	defaultSuffixFormat             = "--resized-%d-%d"
 )
 
 type service struct{}
@@ -13,7 +24,43 @@ func New() ports.Service {
 	return &service{}
 }
 
-func (s *service) Resize(cfg domain.ResizeRequestConfig) (domain.ResizeResponse, error) {
+// Resize will locate files in storage using the provided sourceStoragePaths, it will resize all these images
+// to the width and height provided and resave them to the storage account with the filenameSuffix.
+// If any files can't be found using the storagePaths these will be reported after the method has completed working
+// on any files it could locate. If no filenameSuffix is passed, the suffix will default to --resized-<width>-<height>
+func (s *service) Resize(width, height int32, filenameSuffix string, sourceStoragePaths ...string) (domain.ResizeResponse, error) {
 	res := domain.ResizeResponse{}
-	return res, errors.New("not implemented")
+	if len(sourceStoragePaths) < 1 {
+		return res, errors.New(ErrNoProvidedStoragePaths)
+	}
+	if width < minDimension {
+		return res, errors.New(ErrInvalidWidth)
+	}
+	if height < minDimension {
+		return res, errors.New(ErrInvalidHeight)
+	}
+	if filenameSuffix == "" {
+		filenameSuffix = fmt.Sprintf(defaultSuffixFormat, width, height)
+	}
+
+	// TODO: check that all the image files are available before reaching this point.
+	res.ResizedImagesStoragePaths = make([]string, len(sourceStoragePaths))
+	for i, sp := range sourceStoragePaths {
+		res.ResizedImagesStoragePaths[i] = addSuffix(sp, filenameSuffix)
+	}
+
+	return res, nil
+}
+
+func addSuffix(origPath, suffix string) string {
+	if origPath == "" || suffix == "" {
+		return origPath
+	}
+
+	sb := strings.Builder{}
+	sb.WriteString(strings.TrimSuffix(origPath, filepath.Ext(origPath)))
+	sb.WriteString(filepath.Clean(suffix))
+	sb.WriteString(filepath.Ext(origPath))
+
+	return sb.String()
 }
