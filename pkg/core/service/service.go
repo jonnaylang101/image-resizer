@@ -18,10 +18,14 @@ const (
 	defaultSuffixFormat             = "--resized-%d-%d"
 )
 
-type service struct{}
+type service struct {
+	store ports.Storage
+}
 
-func New() ports.Service {
-	return &service{}
+func New(store ports.Storage) ports.Service {
+	return &service{
+		store: store,
+	}
 }
 
 // Resize will locate files in storage using the provided sourceStoragePaths, it will resize all these images
@@ -43,7 +47,8 @@ func (s *service) Resize(width, height int32, filenameSuffix string, sourceFileS
 		filenameSuffix = fmt.Sprintf(defaultSuffixFormat, width, height)
 	}
 
-	// TODO: check that all the image files are available before reaching this point.
+	// TODO: build this without concurrency first then examine the use of concurrent pipelines - benchmark first
+
 	res.ResizedImagesStoragePaths = make([]string, len(sourceFileStoragePaths))
 	for i, sp := range sourceFileStoragePaths {
 		res.ResizedImagesStoragePaths[i] = addSuffix(sp, filenameSuffix)
